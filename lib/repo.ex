@@ -77,11 +77,13 @@ defmodule AshPostgres.Repo do
   @callback drop?() :: boolean
 
   defmacro __using__(opts) do
-    quote bind_quoted: [opts: opts] do
+    {using, opts} = opts |> Keyword.pop(:using, Ecto.Repo)
+
+    quote bind_quoted: [opts: opts], unquote: true do
       if Keyword.get(opts, :define_ecto_repo?, true) do
         otp_app = opts[:otp_app] || raise("Must configure OTP app")
 
-        use Ecto.Repo,
+        use unquote(using),
           adapter: opts[:adapter] || Ecto.Adapters.Postgres,
           otp_app: otp_app
       end
